@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+	<!-- 
+		Configure Bean 
+		class: full-name class, create Bean in IOC container using reflection (class must have non-parameter constructor)
+	-->
+	<bean id="helloWorld" class="com.spring.beans.HelloWorld">
+		<!-- Configure Bean properties with property injection (with setter())-->
+		<property name="helloName" value="Howie"></property>
+	</bean>
+	
+	<!-- Configure Bean properties -->
+	<bean id="car" class="com.spring.beans.Car">
+		<!-- Configure Bean properties with constructor-arg injection -->
+		<!-- use index or type to differentiate overload constructor -->
+		<!-- if value contains special characters, use <![CDATA[xxxxxxxxxx]]> to wrap it -->
+		<constructor-arg value="Audi" index="0"></constructor-arg>
+		<constructor-arg index="1">
+			<!-- use property or sub-node to configure 'value'/'ref' -->
+			<value><![CDATA[<Shanghai>]]></value>
+		</constructor-arg>
+		<constructor-arg type="double">
+			<value>200000</value>
+		</constructor-arg>
+	</bean>
+	
+	<bean id="car2" class="com.spring.beans.Car">
+		<constructor-arg value="Audi" index="0"></constructor-arg>
+		<constructor-arg value="Shanghai" type="java.lang.String"></constructor-arg>
+		<constructor-arg value="250" type="int"></constructor-arg>
+	</bean>
+	
+	<bean id="person" class="com.spring.beans.Person">
+		<property name="name" value="Tom"></property>
+		<property name="age" value="24"></property>
+		<!-- use ref to build reference relationship between Bean -->
+		<property name="car" ref="car"></property>
+		
+		<!-- assign value to Cascade property; must initiate first (etc. <property name="car" ...) -->
+		<property name="car.maxSpeed" value="250"></property>
+		
+		<!-- inner Bean; cannot be referred by outer Bean -->
+<!-- 		<property name="car">
+			<bean class="com.spring.beans.Car">
+				<constructor-arg value="Ford"></constructor-arg>
+				<constructor-arg value="USA" type="java.lang.String"></constructor-arg>
+				<constructor-arg value="290" type="int"></constructor-arg>
+			</bean>
+		</property> -->
+	</bean>
+	
+	<!-- Configure Collection Property (list/set)-->
+	<bean id="person2" class="com.spring.beans.collection.Person">
+		<property name="name" value="Mike"></property>
+		<property name="age" value="18"></property>
+		<property name="cars">
+			<!-- array use <list>; set use <set> -->
+			<list>
+				<ref bean="car"/>
+				<ref bean="car2"/>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- Configure Collection Property (map)-->
+	<bean id="newPerson" class="com.spring.beans.collection.NewPerson">
+		<property name="name" value="Rose"></property>
+		<property name="age" value="28"></property>
+		<property name="cars">
+			<!-- map use <map><entry> -->
+			<map>
+				<entry key="AA" value-ref="car"></entry>
+				<entry key="BB" value-ref="car2"></entry>
+			</map>
+		</property>
+	</bean>
+	
+	<!-- Configure Properties (common use in DataBase) -->
+	<bean id="dataSource" class="com.spring.beans.collection.DataSource">
+		<property name="properties">
+			<!-- properties use <props><prop> -->
+			<props>
+				<prop key="user">root</prop>
+				<prop key="password">123456</prop>
+				<prop key="jdbcUrl">jdbc:mysql:///test</prop>
+				<prop key="driverClass">com.mysql.jdbc.Driver</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<!-- Configure singleton collection bean, for other bean to share/refer -->
+	<!-- Means put collection configuration outside, and only put reference of that collection inside -->
+	<!-- Need configure nameSpace before use utility scheme (see: https://gist.github.com/thejavamonk/9fe238aa1cd66bf103f1)-->
+	<util:list id="cars_singleton">
+		<ref bean="car"/>
+		<ref bean="car2"/>
+	</util:list>
+	
+	<bean id="person4" class="com.spring.beans.collection.Person">
+		<property name="name" value="Jack"></property>
+		<property name="age" value="33"></property>
+		<property name="cars" ref="cars_singleton"></property>
+	</bean>
+	
+	<!-- use p nameSpace to assign value to Bean's property (more concise) -->
+	<!-- Need configure nameSpace  -->
+	<bean id="person5" class="com.spring.beans.collection.Person" p:age="30"
+		p:name="Jacky" p:cars-ref="cars_singleton">
+	</bean>
+	
+	
+</beans>
+
+
+
+
+
